@@ -1,0 +1,74 @@
+---
+title: "Manhattan Real Estate Condominium Sales Price Analysis"
+author: "Jiaoyan Zhang"
+date: "March 24, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R 
+## Correlations
+Correlation between Dependent Variable Price and Independent variables Bath,Bed,Tax/Mo,CC/Mo and Int#SF
+```{r, echo=FALSE,na.rm=TRUE}
+df <- read.csv("Manhattan Wide_Unit Level.csv", header = TRUE)
+#save(df, file = "df1.RData")
+#load(file="df1.RData")
+
+#exclude RM and AS units
+df <- subset(df, Unit.Type!="as" & Unit.Type!="rm")
+df <- subset(df, Sales.Start.Year>2011)
+str(df)
+```
+
+```{r, echo=FALSE,na.rm=TRUE}
+res <- cor(df[,c(1,7,11,12,13,14,16,24,27,28,29,30,31)],use="na.or.complete",method="pearson")
+round(res, 2)
+
+#cor(df$Price,df$Bath,use="na.or.complete",method="pearson")
+#cor(df$Price,df$Bed,use="na.or.complete",method="pearson")
+#cor(df$Price,df$`Tax/Mo#`,use="na.or.complete",method="pearson")
+#cor(df$Price,df$`CC/Mo`,use="na.or.complete",method="pearson")
+#cor(df$Price,df$`Int# SF`,use="complete.obs",method="pearson")
+```
+
+```{r}
+
+mean(df$Price,na.rm=TRUE)
+min(df$Price,na.rm=TRUE)
+max(df$Price,na.rm=TRUE)
+mean(df$Bed,na.rm=TRUE)
+mean(df$Bath,na.rm=TRUE)
+mean(df$`Int..SF`,na.rm=TRUE)
+mean(df$`Tax.Mo.`,na.rm=TRUE)
+sd(df$Bed,na.rm=TRUE)
+sd(df$Bath,na.rm=TRUE)
+sd(df$`Int..SF`,na.rm=TRUE)
+sd(df$`Tax.Mo.`,na.rm=TRUE)
+
+str(df$Submarket)
+```
+
+## Multiple Linear Regression Model 
+We have chosen Multiple Linear regression Model to analyze the hypothesis we made for the condominium sales price. The variables we are using to build the model are: Maintenance fee X1(cc/mo);number of bedrooms X2(Bed); number of bathrooms X3(Bath); Interior square feet X4(Int# SF); Tax per month X5(Tax/Mo)  
+Price=C0 + C1*X1 + C2*X2 + C3*X3 + C4*X4 + C5*X5 
+
+```{r}
+fit1 <- lm(Price ~ Submarket+Floors+Bed+Bath +`Int..SF`+`Ext..SF`+Tax.Mo.+`Unit.Type`+POOL+SPA+GARAGE+FITNESS.CENTER+DOORMAN, data=df)
+summary(fit1)
+summary.aov(fit1)
+```
+
+```{r}
+fit2 <- lm(Price ~ Submarket+Floors+Bath +`Int..SF`+`Ext..SF`+Tax.Mo.+`Unit.Type`+POOL+FITNESS.CENTER, data=df)
+summary(fit2)
+summary.aov(fit2)
+```
+
+```{r}
+fit3 <- lm(Price ~ Submarket+Floors+Bath +`Int..SF`+`Ext..SF`+Tax.Mo.+`Unit.Type` + Sold.Year+POOL+FITNESS.CENTER, data=df)
+summary(fit3)
+summary.aov(fit3)
+```
